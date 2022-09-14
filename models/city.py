@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 """Defines the City class."""
+from os import getenv
 from models.base_model import Base
 from models.base_model import BaseModel
 from sqlalchemy import Column
@@ -17,6 +18,10 @@ class City(BaseModel, Base):
         state_id (sqlalchemy String): The state id of the City.
     """
     __tablename__ = "cities"
-    name = Column(String(128), nullable=False)
-    state_id = Column(String(60), ForeignKey("states.id"), nullable=False)
-    places = relationship("Place", backref="cities", cascade="delete")
+    if getenv("HBNB_TYPE_STORAGE") == "db":
+        name = Column(String(128), nullable=False)
+        state_id = Column(String(60), ForeignKey("states.id"), nullable=False)
+        places = relationship("Place", backref="cities", cascade="delete")
+    else:
+        state_id = ""
+        name = ""
