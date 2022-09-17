@@ -5,7 +5,7 @@ from models.base_model import Base
 from models.base_model import BaseModel
 from sqlalchemy import Column
 from sqlalchemy import ForeignKey
-from sqlalchemy import String
+from sqlalchemy import String, Integer
 from sqlalchemy.orm import relationship
 
 
@@ -21,7 +21,7 @@ class City(BaseModel, Base):
     if getenv("HBNB_TYPE_STORAGE") == "db":
         name = Column(String(128), nullable=False)
         state_id = Column(String(60), ForeignKey("states.id"), nullable=False)
-        places = relationship("Place", backref="cities", cascade="delete")
+        places = relationship("Place", backref="cities", cascade="all, delete, delete-orphan")
     else:
         state_id = ""
         name = ""
