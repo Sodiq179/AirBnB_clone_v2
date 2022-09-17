@@ -20,12 +20,9 @@ classes = {"User": User, "BaseModel": BaseModel,
            "Review": Review}
 
 class DBStorage:
-    """Represents a database storage engine.
-    Attributes:
-        __engine (sqlalchemy.Engine): The working SQLAlchemy engine.
-        __session (sqlalchemy.Session): The working SQLAlchemy session.
-    """
-
+    '''
+        Create SQLalchemy database
+    '''
     __engine = None
     __session = None
 
@@ -67,26 +64,35 @@ class DBStorage:
             return db_dict
 
     def new(self, obj):
-        """Add obj to the current database session."""
+        '''
+            Add object to current database session
+        '''
         self.__session.add(obj)
 
     def save(self):
-        """Commit all changes to the current database session."""
+        '''
+            Commit all changes of current database session
+        '''
         self.__session.commit()
 
     def delete(self, obj=None):
-        """Delete obj from the current database session."""
+        '''
+            Delete from current database session
+        '''
         if obj is not None:
             self.__session.delete(obj)
 
     def reload(self):
-        """Create all tables in the database and initialize a new session."""
-        Base.metadata.create_all(self.__engine)
-        session_factory = sessionmaker(bind=self.__engine,
-                                       expire_on_commit=False)
-        Session = scoped_session(session_factory)
+        '''
+            Commit all changes of current database session
+        '''
+        self.__session = Base.metadata.create_all(self.__engine)
+        factory = sessionmaker(bind=self.__engine, expire_on_commit=False)
+        Session = scoped_session(factory)
         self.__session = Session()
 
     def close(self):
-        """Close the working SQLAlchemy session."""
+        '''
+            Remove private session attribute
+        '''
         self.__session.close()
