@@ -4,8 +4,6 @@ from datetime import datetime
 from fabric.api import *
 import os
 import shlex
-
-
 env.hosts = ['3.238.173.71','44.192.14.82']
 env.user = "ubuntu"
 
@@ -21,6 +19,7 @@ def deploy():
 
 
 def do_pack():
+    """COMPRESS"""
     try:
         if not os.path.exists("versions"):
             local('mkdir versions')
@@ -32,7 +31,7 @@ def do_pack():
     except:
         return None
 
-
+    
 def do_deploy(archive_path):
     """ Deploys """
     if not os.path.exists(archive_path):
