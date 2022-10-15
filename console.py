@@ -2,6 +2,8 @@
 """ Console Module """
 import cmd
 import sys
+import json
+import shlex 
 from models.base_model import BaseModel
 from models.__init__ import storage
 from models.user import User
@@ -23,6 +25,7 @@ class HBNBCommand(cmd.Cmd):
                'State': State, 'City': City, 'Amenity': Amenity,
                'Review': Review
               }
+              
     dot_cmds = ['all', 'count', 'show', 'destroy', 'update']
     types = {
              'number_rooms': int, 'number_bathrooms': int,
@@ -94,7 +97,7 @@ class HBNBCommand(cmd.Cmd):
 
     def do_quit(self, command):
         """ Method to exit the HBNB console"""
-        exit()
+        return True
 
     def help_quit(self):
         """ Prints the help documentation for quit  """
@@ -102,8 +105,7 @@ class HBNBCommand(cmd.Cmd):
 
     def do_EOF(self, arg):
         """ Handles EOF to exit program """
-        print()
-        exit()
+        return True
 
     def help_EOF(self):
         """ Prints the help documentation for EOF """
@@ -118,13 +120,29 @@ class HBNBCommand(cmd.Cmd):
         if not args:
             print("** class name missing **")
             return
-        elif args not in HBNBCommand.classes:
+
+        elif args.split()[0] not in HBNBCommand.classes:
             print("** class doesn't exist **")
             return
-        new_instance = HBNBCommand.classes[args]()
-        storage.save()
+
+        argsList = shlex.split(args)
+        new_instance = HBNBCommand.classes[argsList[0]]()
+        if len(argsList) > 1:
+            for param in argsList[1:]:
+                try:
+                    paramSplit = param.split("=")
+                    key = paramSplit[0]
+                    if hasattr(new_instance, key) == True:
+                        value = paramSplit[1].replace("_"," ")
+                        try:
+                            value = eval(paramSplit[1])
+                        except:
+                            pass
+                        setattr(new_instance, key, value)
+                except (ValueError, IndexError):
+                    pass
+        new_instance.save()
         print(new_instance.id)
-        storage.save()
 
     def help_create(self):
         """ Help information for the create method """
@@ -132,30 +150,27 @@ class HBNBCommand(cmd.Cmd):
         print("[Usage]: create <className>\n")
 
     def do_show(self, args):
-        """ Method to show an individual object """
-        new = args.partition(" ")
-        c_name = new[0]
-        c_id = new[2]
-
-        # guard against trailing args
-        if c_id and ' ' in c_id:
-            c_id = c_id.partition(' ')[0]
-
-        if not c_name:
+        '''
+            Print the string representation of an instance baed on
+            the class name and id given as args.
+        '''
+        args = shlex.split(args)
+        if len(args) == 0:
             print("** class name missing **")
             return
-
-        if c_name not in HBNBCommand.classes:
-            print("** class doesn't exist **")
-            return
-
-        if not c_id:
+        if len(args) == 1:
             print("** instance id missing **")
             return
-
-        key = c_name + "." + c_id
+        obj_dict = storage.all(args[0])
         try:
-            print(storage._FileStorage__objects[key])
+            eval(args[0])
+        except NameError:
+            print("** class doesn't exist **")
+            return
+        key = args[0] + "." + args[1]
+        try:
+            value = obj_dict[key]
+            print(value)
         except KeyError:
             print("** no instance found **")
 
@@ -165,32 +180,31 @@ class HBNBCommand(cmd.Cmd):
         print("[Usage]: show <className> <objectId>\n")
 
     def do_destroy(self, args):
-        """ Destroys a specified object """
-        new = args.partition(" ")
-        c_name = new[0]
-        c_id = new[2]
-        if c_id and ' ' in c_id:
-            c_id = c_id.partition(' ')[0]
-
-        if not c_name:
+        '''
+            Deletes an instance based on the class name and id.
+        '''
+        args = shlex.split(args)
+        if len(args) == 0:
             print("** class name missing **")
             return
-
-        if c_name not in HBNBCommand.classes:
-            print("** class doesn't exist **")
-            return
-
-        if not c_id:
+        elif len(args) == 1:
             print("** instance id missing **")
             return
-
-        key = c_name + "." + c_id
-
+        class_name = args[0]
+        class_id = args[1]
+        storage.reload()
+        obj_dict = storage.all()
         try:
-            del(storage.all()[key])
-            storage.save()
+            eval(class_name)
+        except NameError:
+            print("** class doesn't exist **")
+            return
+        key = class_name + "." + class_id
+        try:
+            del obj_dict[key]
         except KeyError:
             print("** no instance found **")
+        storage.save()
 
     def help_destroy(self):
         """ Help information for the destroy command """
