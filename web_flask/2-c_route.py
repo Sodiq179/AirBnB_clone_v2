@@ -23,6 +23,7 @@ def hbnb_page():
 @app.route("/c/<text>", strict_slashes=False)
 def c_is_fun(text):
 	"""C is fun"""
+	text = " ".join(text.split("_"))
 	return "C {}".format(text)
 
 
