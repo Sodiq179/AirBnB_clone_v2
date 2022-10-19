@@ -35,11 +35,10 @@ def python_is_fun(text = "is cool"):
 		text = " ".join(text.split("_"))
 	return "Python {}".format(text)
 
-@app.route('/number/<n>', strict_slashes=False)
+@app.route('/number/<int:n>', strict_slashes=False)
 def is_number(n):
 	"""Check number"""
-	if type(n) == int:
-		return "{} is a number".format(n)
+	return "{%d} is a number".format(n)
 
 
 if __name__ == "__main__":
