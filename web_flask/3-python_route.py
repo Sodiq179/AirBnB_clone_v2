@@ -27,7 +27,7 @@ def c_is_fun(text):
 	text = " ".join(text.split("_"))
 	return "C {}".format(text)
 
-@app.route("/python/(<text>)", strict_slashes=False)
+@app.route("/python/<text>", strict_slashes=False)
 def python_is_fun(text = "is cool"):
 	"Python is cool"
 	text = " ".join(text.split("_"))
